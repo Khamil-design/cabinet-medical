@@ -274,9 +274,9 @@ async function renderPlanning() {
     state.planningMedecin = e.target.value;
     renderPlanning();
   };
-  document.getElementById("btnNouveauRdv").onclick = openRdvForm;
+  document.getElementById("btnNouveauRdv").onclick = () => openRdvForm();
   const btnAbsence = document.getElementById("btnAbsence");
-  if (btnAbsence) btnAbsence.onclick = openAbsenceForm;
+  if (btnAbsence) btnAbsence.onclick = () => openAbsenceForm();
 
   try {
     let debut = state.planningDate;
@@ -721,7 +721,7 @@ async function renderPatients() {
     <div id="patientsBody" class="empty">Chargement…</div>
   `;
 
-  document.getElementById("btnNouveauPatient").onclick = openPatientForm;
+  document.getElementById("btnNouveauPatient").onclick = () => openPatientForm();
   document.getElementById("recherchePatient").oninput = debounce(async (e) => {
     await afficherPatients(e.target.value);
   }, 250);
