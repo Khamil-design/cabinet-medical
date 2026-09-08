@@ -3,10 +3,15 @@ const path = require("node:path");
 const fs = require("node:fs");
 const bcrypt = require("bcryptjs");
 
-const DATA_DIR = path.join(__dirname, "data");
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+// Emplacement de la base de données.
+// Par défaut : ./data/cabinet.db (dossier local).
+// En production (Railway, etc.) : pointer SQLITE_PATH vers le volume persistant.
+const DB_PATH = process.env.SQLITE_PATH
+  ? String(process.env.SQLITE_PATH)
+  : path.join(__dirname, "data", "cabinet.db");
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
-const db = new DatabaseSync(path.join(DATA_DIR, "cabinet.db"));
+const db = new DatabaseSync(DB_PATH);
 
 db.exec("PRAGMA journal_mode = WAL;");
 db.exec("PRAGMA foreign_keys = ON;");
