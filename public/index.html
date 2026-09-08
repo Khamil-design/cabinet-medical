@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cabinet Médical</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="sidebar-logo">+</span>
+      <div>
+        <strong>Cabinet Médical</strong>
+        <small>Gestion interne</small>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+      <button class="nav-link" data-view="planning">🗓 Planning</button>
+      <button class="nav-link" data-view="patients">👥 Patients</button>
+      <button class="nav-link" data-view="factures">💶 Facturation</button>
+      <button class="nav-link" data-view="a-confirmer">🔔 À confirmer</button>
+      <button class="nav-link admin-only" data-view="activite">📊 Activité</button>
+      <button class="nav-link admin-only" data-view="utilisateurs">🔐 Utilisateurs</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-box">
+        <strong id="userName"></strong>
+        <small id="userRole"></small>
+      </div>
+      <button class="btn btn-ghost" id="logoutBtn">Se déconnecter</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div id="view" class="view"></div>
+  </main>
+</div>
+
+<!-- Modal générique -->
+<div id="modalOverlay" class="modal-overlay" hidden>
+  <div class="modal" id="modalBox">
+    <div class="modal-head">
+      <h2 id="modalTitle"></h2>
+      <button class="modal-close" id="modalClose" title="Fermer">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

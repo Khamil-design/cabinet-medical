@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connexion — Cabinet Médical</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-body">
+
+<main class="auth-card">
+  <div class="auth-logo">+</div>
+  <h1>Cabinet Médical</h1>
+  <p class="auth-sub">Gestion du planning, des patients et de la facturation</p>
+
+  <form id="loginForm" autocomplete="off">
+    <label for="username">Nom d'utilisateur</label>
+    <input id="username" name="username" type="text" required autofocus>
+
+    <label for="password">Mot de passe</label>
+    <input id="password" name="password" type="password" required>
+
+    <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+  </form>
+
+  <p id="authError" class="auth-error" hidden></p>
+
+  <div class="auth-hint">
+    <strong>Comptes de démonstration</strong><br>
+    admin / admin123 · amal / medecin123<br>
+    youssef / medecin123 · secretariat / secretaire123
+  </div>
+
+  <div class="auth-hint">
+    Vous êtes patient ? <a class="auth-link" href="/rdv">Prendre rendez-vous →</a>
+  </div>
+
+  <div class="auth-hint">
+    <strong>Lien public de prise de rendez-vous</strong><br>
+    <span id="publicUrl" style="word-break:break-all"></span><br>
+    <button type="button" class="btn btn-outline btn-sm" id="btnCopyPublic" style="margin-top:8px">📋 Copier le lien</button>
+  </div>
+</main>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const err = document.getElementById("authError");
+  err.hidden = true;
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: document.getElementById("username").value,
+      password: document.getElementById("password").value
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    err.textContent = data.erreur || "Erreur de connexion.";
+    err.hidden = false;
+    return;
+  }
+  window.location.href = "/";
+});
+
+const publicUrl = location.origin + "/rdv";
+document.getElementById("publicUrl").textContent = publicUrl;
+document.getElementById("btnCopyPublic").addEventListener("click", function () {
+  const copie = function () {
+    this.textContent = "Lien copié ✓";
+    setTimeout(() => (this.textContent = "📋 Copier le lien"), 2000);
+  }.bind(this);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(publicUrl).then(copie).catch(() => copie());
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = publicUrl;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+    copie();
+  }
+});
+</script>
+</body>
+</html>

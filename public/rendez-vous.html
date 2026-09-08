@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="title">Prendre rendez-vous — Cabinet Médical</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-body">
+
+<main class="auth-card auth-card-lg">
+  <button type="button" id="langToggle" class="lang-toggle"></button>
+
+  <div class="auth-logo">+</div>
+  <h1 data-i18n="cabinet">Cabinet Médical</h1>
+  <p class="auth-sub" data-i18n="subtitle">Prenez rendez-vous en quelques instants</p>
+
+  <div class="wa-bar">
+    <button type="button" class="btn btn-outline btn-sm" id="btnWhatsApp" data-i18n="waShare">Partager par WhatsApp</button>
+    <button type="button" class="btn btn-outline btn-sm" id="btnCopier" data-i18n="waCopy">Copier le lien</button>
+  </div>
+
+  <!-- ============ Réservation ============ -->
+  <section id="bookingView">
+    <form id="rdvForm" autocomplete="off">
+      <div class="form-row">
+        <div><label for="prenom" data-i18n="prenom">Prénom *</label><input id="prenom" type="text" required autofocus></div>
+        <div><label for="nom" data-i18n="nom">Nom *</label><input id="nom" type="text" required></div>
+      </div>
+      <div class="form-row">
+        <div><label for="dateNaissance" data-i18n="dateNaissance">Date de naissance</label><input id="dateNaissance" type="date" max="2999-01-01"></div>
+        <div><label for="sexe" data-i18n="sexe">Sexe</label><select id="sexe"></select></div>
+      </div>
+      <div class="form-row">
+        <div><label for="telephone" data-i18n="telephone">Téléphone *</label><input id="telephone" type="tel" required placeholder="06 12 34 56 78"></div>
+        <div><label for="email" data-i18n="email">Email</label><input id="email" type="email"></div>
+      </div>
+
+      <label for="medecin" data-i18n="medecin">Médecin *</label>
+      <select id="medecin" required><option value="">…</option></select>
+
+      <div class="form-row">
+        <div><label for="date" data-i18n="date">Date *</label><input id="date" type="date" required></div>
+        <div><label for="heure" data-i18n="heure">Heure *</label><select id="heure" required><option value="">…</option></select></div>
+      </div>
+
+      <label for="motif" data-i18n="motif">Objet du rendez-vous *</label>
+      <select id="motif" required></select>
+      <p class="duree-info" id="dureeInfo"></p>
+
+      <label for="notes" data-i18n="notes">Précisions (optionnel)</label>
+      <textarea id="notes" rows="3" data-i18n-ph="notesPh" placeholder="…"></textarea>
+
+      <input type="text" id="siteweb" name="siteweb" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <p class="dispo" id="dispoMsg" hidden></p>
+
+      <button type="submit" class="btn btn-primary btn-block" data-i18n="submit">Confirmer le rendez-vous</button>
+    </form>
+
+    <div id="rdvResult" hidden>
+      <p class="rdv-success" id="rdvSuccess"></p>
+      <button type="button" class="btn btn-outline btn-block" id="btnAgain" data-i18n="again">Prendre un autre rendez-vous</button>
+    </div>
+
+    <p id="rdvError" class="auth-error" hidden></p>
+
+    <div class="auth-hint">
+      <span data-i18n="hint1">Les créneaux déjà occupés sont désactivés dans la liste des heures.</span><br>
+      <span data-i18n="hint2">Un code de confirmation vous sera envoyé par téléphone ou email : il permet d'annuler le rendez-vous en ligne.</span>
+      <a class="auth-link" href="/login" data-i18n="staff">Espace personnel</a>
+    </div>
+
+    <p class="auth-form-link"><a href="#" id="goCancel" class="auth-link" data-i18n="cancelLink">Annuler un rendez-vous</a></p>
+  </section>
+
+  <!-- ============ Annulation ============ -->
+  <section id="cancelView" hidden>
+    <h2 style="font-size:19px;margin:0 0 4px" data-i18n="cancelTitle">Annuler un rendez-vous</h2>
+    <p class="auth-sub" data-i18n="cancelSubtitle">Entrez le numéro de rendez-vous, votre téléphone et le code de confirmation reçu.</p>
+
+    <form id="cancelForm" autocomplete="off">
+      <div class="form-row">
+        <div><label for="cancelRdv" data-i18n="cancelRdv">N° de rendez-vous (optionnel)</label><input id="cancelRdv" type="number" inputmode="numeric" min="1" placeholder="12"></div>
+        <div><label for="cancelTel" data-i18n="cancelTel">Téléphone *</label><input id="cancelTel" type="tel" required placeholder="06 12 34 56 78"></div>
+      </div>
+      <label for="cancelCode" data-i18n="cancelCode">Code de confirmation *</label>
+      <input id="cancelCode" type="text" required maxlength="6" style="text-transform:uppercase" placeholder="ABC123">
+      <p class="dispo" id="cancelInfo" hidden></p>
+      <button type="submit" class="btn btn-danger btn-block" data-i18n="cancelBtn">Annuler le rendez-vous</button>
+    </form>
+
+    <div id="cancelResult" hidden>
+      <p class="rdv-success" id="cancelSuccess"></p>
+      <button type="button" class="btn btn-outline btn-block" id="btnCancelAgain" data-i18n="againCancel">Annuler un autre rendez-vous</button>
+    </div>
+
+    <p id="cancelError" class="auth-error" hidden></p>
+
+    <p class="auth-form-link"><a href="#" id="goBooking" class="auth-link" data-i18n="goBooking">Prendre un rendez-vous</a></p>
+  </section>
+</main>
+
+<script src="/js/rdv.js"></script>
+</body>
+</html>

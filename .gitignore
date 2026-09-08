@@ -1,0 +1,9 @@
+node_modules/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env
+.env.*
+opencode.json
+!opencode.example.json
