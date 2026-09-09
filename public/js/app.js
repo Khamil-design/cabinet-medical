@@ -123,6 +123,8 @@ function route() {
     renderAConfirmer();
   } else if (h === "activite") {
     renderActivite();
+  } else if (h === "tarifs") {
+    renderTarifs();
   } else if (h === "utilisateurs") {
     renderUtilisateurs();
   } else {
@@ -954,8 +956,8 @@ async function renderPatientDetail(id) {
         ${factures.length
           ? `<div class="summary" style="margin-bottom:12px">
                <div class="chip"><b>${factures.length}</b><small>Factures</small></div>
-               <div class="chip termine"><b>${(factures.reduce((s, f) => s + f.paye, 0)).toFixed(2)} €</b><small>Encaissé</small></div>
-               <div class="chip planifie"><b>${(factures.reduce((s, f) => s + Math.max(0, f.montant - f.paye), 0)).toFixed(2)} €</b><small>Restant dû</small></div>
+               <div class="chip termine"><b>${(factures.reduce((s, f) => s + f.paye, 0)).toFixed(2)} MDH</b><small>Encaissé</small></div>
+               <div class="chip planifie"><b>${(factures.reduce((s, f) => s + Math.max(0, f.montant - f.paye), 0)).toFixed(2)} MDH</b><small>Restant dû</small></div>
              </div>
              <table class="table">
                <thead><tr><th>N°</th><th>Désignation</th><th>Montant</th><th>Payé</th><th>Reste</th><th>Statut</th><th class="no-print"></th></tr></thead>
@@ -963,8 +965,8 @@ async function renderPatientDetail(id) {
                  const reste = Math.max(0, f.montant - f.paye);
                  return `<tr>
                    <td>${esc(f.numero)}</td><td>${esc(f.designation)}</td>
-                   <td>${f.montant.toFixed(2)} €</td><td>${f.paye.toFixed(2)} €</td>
-                   <td>${reste.toFixed(2)} €</td>
+                   <td>${f.montant.toFixed(2)} MDH</td><td>${f.paye.toFixed(2)} MDH</td>
+                   <td>${reste.toFixed(2)} MDH</td>
                    <td>${statutBadge(f.statut)}</td>
                    <td class="no-print"><div class="actions">
                      <button class="btn btn-outline btn-sm" onclick="detailFacture(${f.id})">Détail</button>
@@ -1199,9 +1201,9 @@ async function afficherFactures() {
                   <td>${esc(f.numero)}</td>
                   <td><a href="#patient/${f.patient_id}" style="color:var(--ink);text-decoration:none;font-weight:600">${esc(nomComplet(f))}</a></td>
                   <td>${esc(f.designation)}</td>
-                  <td>${f.montant.toFixed(2)} €</td>
-                  <td>${f.paye.toFixed(2)} €</td>
-                  <td>${reste.toFixed(2)} €</td>
+                  <td>${f.montant.toFixed(2)} MDH</td>
+                  <td>${f.paye.toFixed(2)} MDH</td>
+                  <td>${reste.toFixed(2)} MDH</td>
                   <td>${statutBadge(f.statut)}</td>
                   <td><div class="actions">
                     <button class="btn btn-outline btn-sm" onclick="detailFacture(${f.id})">Détail</button>
@@ -1230,7 +1232,7 @@ async function openFactureForm(patientIdPreselectionne) {
       <label>Désignation *</label>
       <input type="text" id="fcDesignation" placeholder="Consultation">
       <div class="form-row">
-        <div><label>Montant (€) *</label><input type="number" id="fcMontant" step="0.01" min="0.01"></div>
+        <div><label>Montant (MDH) *</label><input type="number" id="fcMontant" step="0.01" min="0.01"></div>
         <div><label>Lié au rendez-vous n°</label><input type="number" id="fcRdv" placeholder="(optionnel)"></div>
       </div>
       <div class="form-actions">
@@ -1266,8 +1268,8 @@ async function detailFacture(id) {
     <div class="kv">
       <div><dt>Patient</dt><dd>${esc(nomComplet(facture))}</dd></div>
       <div><dt>Désignation</dt><dd>${esc(facture.designation)}</dd></div>
-      <div><dt>Montant</dt><dd>${facture.montant.toFixed(2)} €</dd></div>
-      <div><dt>Payé / Reste</dt><dd>${paye.toFixed(2)} / ${reste.toFixed(2)} €</dd></div>
+      <div><dt>Montant</dt><dd>${facture.montant.toFixed(2)} MDH</dd></div>
+      <div><dt>Payé / Reste</dt><dd>${paye.toFixed(2)} / ${reste.toFixed(2)} MDH</dd></div>
       <div><dt>Statut</dt><dd>${statutBadge(facture.statut)}</dd></div>
     </div>
 
@@ -1275,7 +1277,7 @@ async function detailFacture(id) {
     ${paiements.length
       ? `<table class="table">
            <thead><tr><th>Date</th><th>Montant</th><th>Mode</th></tr></thead>
-           <tbody>${paiements.map((pm) => `<tr><td>${esc(pm.date_paiement)}</td><td>${pm.montant.toFixed(2)} €</td><td>${esc(pm.mode)}</td></tr>`).join("")}</tbody>
+           <tbody>${paiements.map((pm) => `<tr><td>${esc(pm.date_paiement)}</td><td>${pm.montant.toFixed(2)} MDH</td><td>${esc(pm.mode)}</td></tr>`).join("")}</tbody>
          </table>`
       : `<div class="empty" style="padding:14px">Aucun paiement.</div>`}
 
@@ -1283,7 +1285,7 @@ async function detailFacture(id) {
       <h3 style="font-size:16px;margin:18px 0 8px">Encaisser un paiement</h3>
       <form id="paiementForm">
         <div class="form-row">
-          <div><label>Montant (€)</label><input type="number" step="0.01" id="pmMontant" value="${reste.toFixed(2)}"></div>
+          <div><label>Montant (MDH)</label><input type="number" step="0.01" id="pmMontant" value="${reste.toFixed(2)}"></div>
           <div><label>Mode</label>
             <select id="pmMode">
               <option value="especes">Espèces</option>
@@ -1336,7 +1338,7 @@ async function supprimerFacture(id) {
 // ---------------------------------------------------------------
 
 function fmtMontant(n) {
-  return `${Number(n).toFixed(2).replace(".", ",")} €`;
+  return `${Number(n).toFixed(2).replace(".", ",")} MDH`;
 }
 
 function barrePourcent(p) {
@@ -1544,6 +1546,127 @@ async function toggleActifUser(id, estMoi) {
     await api(`/api/users/${id}`, "PUT", { actif: !u.actif });
     toast("Utilisateur mis à jour.");
     renderUtilisateurs();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+// ---------------------------------------------------------------
+// TARIFS (admin) — grille des activités du cabinet
+// ---------------------------------------------------------------
+
+async function renderTarifs() {
+  const estAdmin = state.user && state.user.role === "admin";
+  view.innerHTML = `
+    <div class="view-header">
+      <h1>Tarifs des activités</h1>
+      <div class="toolbar">
+        ${estAdmin ? `<button class="btn btn-primary" onclick="openTarifForm()">+ Nouvelle activité</button>` : ""}
+      </div>
+    </div>
+    <div id="tarifsBody" class="empty">Chargement…</div>
+  `;
+  const body = document.getElementById("tarifsBody");
+  try {
+    const tarifs = await api("/api/tarifs");
+    const categories = [...new Set(tarifs.map((t) => t.categorie))].sort((a, b) => a.localeCompare(b, "fr"));
+    const escN = (n) => Number(n).toFixed(2).replace(".", ",");
+    body.className = "";
+    body.innerHTML = categories.map((cat) => `
+      <h2 class="tarif-cat">${esc(cat)}</h2>
+      <div class="card">
+        <table class="table">
+          <thead><tr><th>Désignation</th><th>Cotation</th><th>Prix (MDH)</th>${estAdmin ? `<th style="text-align:end">Actions</th>` : ""}</tr></thead>
+          <tbody>
+            ${tarifs.filter((t) => t.categorie === cat).map((t) => `
+              <tr class="${t.actif ? "" : "tarif-inactif"}">
+                <td>${esc(t.designation)}</td>
+                <td>${esc(t.cotation || "—")}</td>
+                <td>${escN(t.prix)}</td>
+                ${estAdmin ? `<td><div class="actions">
+                  <button class="btn btn-outline btn-sm" onclick="openTarifForm(${t.id})">Modifier</button>
+                  <button class="btn btn-outline btn-sm" onclick="toggleActifTarif(${t.id})">${t.actif ? "Désactiver" : "Activer"}</button>
+                  <button class="btn btn-danger-ghost btn-sm" onclick="supprimerTarif(${t.id})">Supprimer</button>
+                </div></td>` : ""}
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    `).join("");
+  } catch (e) {
+    body.className = "";
+    body.innerHTML = `<div class="card"><div class="empty">${esc(e.message)}</div></div>`;
+  }
+}
+
+async function openTarifForm(id) {
+  let t = { categorie: "Soins", designation: "", cotation: "", prix: "" };
+  if (id) {
+    const tarifs = await api("/api/tarifs");
+    t = tarifs.find((x) => x.id === id) || t;
+  }
+  openModal(id ? "Modifier l'activité" : "Nouvelle activité", `
+    <form id="tarifForm">
+      <div class="form-row">
+        <div><label>Catégorie *</label>
+          <input type="text" id="tfCategorie" list="tfCategories" value="${esc(t.categorie)}" required>
+          <datalist id="tfCategories">
+            <option value="Soins"><option value="Consultation"><option value="Vaccination">
+            <option value="Examens"><option value="Urgences"><option value="Certificats"><option value="Actes">
+          </datalist>
+        </div>
+        <div><label>Cotation</label><input type="text" id="tfCotation" value="${esc(t.cotation || "")}" placeholder="C, K+P, ECG…"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Désignation *</label><input type="text" id="tfDesignation" value="${esc(t.designation)}" required></div>
+        <div><label>Prix (MDH) *</label><input type="number" id="tfPrix" step="0.01" min="0" value="${t.prix}"></div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  `, true);
+
+  document.getElementById("tarifForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const body = {
+      categorie: document.getElementById("tfCategorie").value.trim() || "Soins",
+      designation: document.getElementById("tfDesignation").value,
+      cotation: document.getElementById("tfCotation").value.trim() || null,
+      prix: Number(document.getElementById("tfPrix").value)
+    };
+    try {
+      if (id) await api(`/api/tarifs/${id}`, "PUT", body);
+      else await api("/api/tarifs", "POST", body);
+      closeModal();
+      toast("Activité enregistrée.");
+      renderTarifs();
+    } catch (err) {
+      toast(err.message, true);
+    }
+  };
+}
+
+async function toggleActifTarif(id) {
+  const tarifs = await api("/api/tarifs");
+  const t = tarifs.find((x) => x.id === id);
+  if (!t) return;
+  try {
+    await api(`/api/tarifs/${id}`, "PUT", { actif: !t.actif });
+    toast(t.actif ? "Activité désactivée." : "Activité réactivée.");
+    renderTarifs();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function supprimerTarif(id) {
+  if (!confirm("Supprimer définitivement cette activité du tarifaire ?")) return;
+  try {
+    await api(`/api/tarifs/${id}`, "DELETE");
+    toast("Activité supprimée.");
+    renderTarifs();
   } catch (e) {
     toast(e.message, true);
   }

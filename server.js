@@ -1100,8 +1100,8 @@ app.get("/api/export/factures.pdf", role("admin"), (req, res) => {
   const total = rows.reduce((s, f) => s + f.montant, 0);
   const dec = (n) => n.toFixed(2).replace(".", ",");
   envoyerPDF(res, "factures.pdf", (doc) => {
-    entetePDF(doc, `Factures (${rows.length}) — total ${dec(total)} €`);
-    tablePDF(doc, ["N°", "Date", "Patient", "Médecin", "Désignation", "Montant", "Statut"], rows.map((f) => [f.numero, (f.cree_le || "").split(" ")[0], `${f.patient_prenom} ${f.patient_nom}`, f.medecin_nom || "", f.designation, `${dec(f.montant)} €`, f.statut]));
+    entetePDF(doc, `Factures (${rows.length}) — total ${dec(total)} MDH`);
+    tablePDF(doc, ["N°", "Date", "Patient", "Médecin", "Désignation", "Montant", "Statut"], rows.map((f) => [f.numero, (f.cree_le || "").split(" ")[0], `${f.patient_prenom} ${f.patient_nom}`, f.medecin_nom || "", f.designation, `${dec(f.montant)} MDH`, f.statut]));
   });
 });
 
@@ -1149,7 +1149,7 @@ app.get("/api/export/feuille-de-soins.pdf", role("admin", "medecin", "secretaire
       ? [
           `Acte : ${facture.designation}`,
           `Date : ${facture.cree_le ? facture.cree_le.split(" ")[0] : "—"} · Cotation : C`,
-          `Montant : ${facture.montant.toFixed(2).replace(".", ",")} € · Règlement : ${statutFacture}`,
+          `Montant : ${facture.montant.toFixed(2).replace(".", ",")} MDH · Règlement : ${statutFacture}`,
           `Médecin : ${facture.medecin_nom || "—"}`
         ]
       : ["Aucun acte facturé pour ce patient."];
@@ -1162,6 +1162,90 @@ app.get("/api/export/feuille-de-soins.pdf", role("admin", "medecin", "secretaire
     doc.text("Signature du patient : ______________________________", L, doc.y + 10, { width: W / 2 });
     doc.text("Signature et cachet du praticien : ______________________________", L + W / 2, doc.y - 14, { width: W / 2 });
   });
+});
+
+// ---------------------------------------------------------------
+// Tarifs (grille des activités du cabinet, prix réglables par l'admin)
+// ---------------------------------------------------------------
+
+// Lecture : tous les rôles connectés. Écriture : admin uniquement.
+app.get("/api/tarifs", requiertAuth, (req, res) => {
+  const inclureInactifs = req.session.user.role === "admin";
+  const rows = db
+    .prepare(
+      `SELECT id, categorie, designation, cotation, prix, actif
+       FROM tarifs
+       ${inclureInactifs ? "" : "WHERE actif = 1"}
+       ORDER BY categorie, designation`
+    )
+    .all();
+  res.json(rows);
+});
+
+app.post("/api/tarifs", role("admin"), (req, res) => {
+  const { categorie, designation, cotation, prix } = req.body || {};
+  if (!designation || String(designation).trim() === "") {
+    return res.status(400).json({ erreur: "La désignation est obligatoire." });
+  }
+  const prixN = Number(prix);
+  if (!Number.isFinite(prixN) || prixN < 0) {
+    return res.status(400).json({ erreur: "Prix invalide." });
+  }
+  try {
+    const r = db
+      .prepare("INSERT INTO tarifs (categorie, designation, cotation, prix) VALUES (?, ?, ?, ?)")
+      .run(String(categorie || "Soins").trim(), String(designation).trim(), (cotation || null), prixN);
+    res.status(201).json({ id: r.lastInsertRowid });
+  } catch (e) {
+    if (String(e.message).includes("UNIQUE")) {
+      return res.status(409).json({ erreur: "Cette désignation existe déjà." });
+    }
+    throw e;
+  }
+});
+
+app.put("/api/tarifs/:id", role("admin"), (req, res) => {
+  const id = idRequis(req, res);
+  if (!id) return;
+  const tarif = db.prepare("SELECT * FROM tarifs WHERE id = ?").get(id);
+  if (!tarif) return res.status(404).json({ erreur: "Tarif introuvable." });
+
+  const { categorie, designation, cotation, prix, actif } = req.body || {};
+  const prixN = prix !== undefined ? Number(prix) : tarif.prix;
+  if (!Number.isFinite(prixN) || prixN < 0) {
+    return res.status(400).json({ erreur: "Prix invalide." });
+  }
+  const designationFinale = designation !== undefined && String(designation).trim() !== ""
+    ? String(designation).trim()
+    : tarif.designation;
+  try {
+    db.prepare(
+      `UPDATE tarifs SET categorie = ?, designation = ?, cotation = ?, prix = ?, actif = ?
+       WHERE id = ?`
+    ).run(
+      categorie !== undefined ? String(categorie).trim() : tarif.categorie,
+      designationFinale,
+      cotation !== undefined ? (cotation || null) : tarif.cotation,
+      prixN,
+      actif !== undefined ? (actif ? 1 : 0) : tarif.actif,
+      id
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    if (String(e.message).includes("UNIQUE")) {
+      return res.status(409).json({ erreur: "Cette désignation existe déjà." });
+    }
+    throw e;
+  }
+});
+
+app.delete("/api/tarifs/:id", role("admin"), (req, res) => {
+  const id = idRequis(req, res);
+  if (!id) return;
+  const tarif = db.prepare("SELECT id FROM tarifs WHERE id = ?").get(id);
+  if (!tarif) return res.status(404).json({ erreur: "Tarif introuvable." });
+  db.prepare("DELETE FROM tarifs WHERE id = ?").run(id);
+  res.json({ ok: true });
 });
 
 // ---------------------------------------------------------------

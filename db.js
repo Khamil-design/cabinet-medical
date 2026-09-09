@@ -127,6 +127,16 @@ CREATE INDEX IF NOT EXISTS idx_fact_patient ON factures(patient_id);
 CREATE INDEX IF NOT EXISTS idx_ordo_patient ON ordonnances(patient_id);
 CREATE INDEX IF NOT EXISTS idx_rappels_rdv ON rappels(rendezvous_id);
 CREATE INDEX IF NOT EXISTS idx_rappels_envoye ON rappels(envoye);
+
+CREATE TABLE IF NOT EXISTS tarifs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  categorie TEXT NOT NULL DEFAULT 'Soins',
+  designation TEXT NOT NULL UNIQUE,
+  cotation TEXT,
+  prix REAL NOT NULL DEFAULT 0 CHECK (prix >= 0),
+  actif INTEGER NOT NULL DEFAULT 1,
+  cree_le TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+);
 `);
 
 // Migration : colonnes pour l'annulation en ligne (code de confirmation + jeton).
@@ -178,6 +188,33 @@ if (countUsers === 0) {
   inserer.run("youssef", hashMotDePasse("medecin123"), "Dr Youssef El Idrissi", "medecin");
   inserer.run("secretariat", hashMotDePasse("secretaire123"), "Secrétariat", "secretaire");
   console.log("[db] Utilisateurs de démonstration créés.");
+}
+
+// Tarifs par défaut (uniquement si la table tarifs est vide).
+const countTarifs = db.prepare("SELECT COUNT(*) AS n FROM tarifs").get().n;
+if (countTarifs === 0) {
+  const TARIFS_DEFAUT = [
+    ["Consultation", "Consultation générale", "C", 200],
+    ["Soins", "Consultation de contrôle", "K+P", 150],
+    ["Soins", "Consultation spécialisée", "CSP", 300],
+    ["Soins", "Suivi de grossesse (échographie)", "S", 350],
+    ["Soins", "Pansement / soin", "PSG", 80],
+    ["Vaccination", "Vaccination", "VAC", 50],
+    ["Examens", "ECG (électrocardiogramme)", "ECG", 200],
+    ["Examens", "Test d'effort", "EFF", 400],
+    ["Examens", "Analyse laboratoire", "BIO", 250],
+    ["Urgences", "Gardes / urgences", "URG", 400],
+    ["Certificats", "Certificat médical standard", "CMS", 100],
+    ["Certificats", "Certificat de visite / sport", "CSP", 100],
+    ["Certificats", "Certificat de travail", "CT", 100],
+    ["Actes", "Rapport d'hospitalisation", "RH", 200],
+    ["Actes", "Certificat médical de soins (feuille de soins)", "FS", 150]
+  ];
+  const insererTarif = db.prepare(
+    "INSERT INTO tarifs (categorie, designation, cotation, prix) VALUES (?, ?, ?, ?)"
+  );
+  for (const [cat, des, cot, prix] of TARIFS_DEFAUT) insererTarif.run(cat, des, cot, prix);
+  console.log("[db] Tarifs par défaut créés.");
 }
 
 module.exports = db;
