@@ -7,3 +7,7 @@ node_modules/
 .env.*
 opencode.json
 !opencode.example.json
+
+# Prototypes hors projet
+nouveau cabinet/
+nouveau_cabinet/
