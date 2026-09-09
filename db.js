@@ -217,4 +217,16 @@ if (countTarifs === 0) {
   console.log("[db] Tarifs par défaut créés.");
 }
 
+// Réinitialisation du mot de passe admin en production (via ADMIN_RESET_PASSWORD).
+// Utile si l'accès admin est perdu ; retirer la variable après usage.
+const ADMIN_RESET = process.env.ADMIN_RESET_PASSWORD;
+if (ADMIN_RESET && String(ADMIN_RESET).length >= 6) {
+  const adminRow = db.prepare("SELECT id FROM users WHERE username = 'admin'").get();
+  if (adminRow) {
+    db.prepare("UPDATE users SET password_hash = ? WHERE id = ?")
+      .run(hashMotDePasse(String(ADMIN_RESET)), adminRow.id);
+    console.log("[db] Mot de passe admin réinitialisé via ADMIN_RESET_PASSWORD.");
+  }
+}
+
 module.exports = db;
